@@ -8,16 +8,23 @@ import kotlin.concurrent.thread
 class SocketIO(val socket : Socket) {
     //для остановки клиента
     private var stop = false
-    private var thread:Thread?=null
     //события когда теряется соединение с сокетом
     private val socketClosedListener = mutableListOf<()->Unit>()
-
     fun addSocketClosedListener(l:()->Unit){
         socketClosedListener.add(l)
     }
     fun removeSocketClosedListener(l:()->Unit){
         socketClosedListener.remove(l)
     }
+
+    private val DataListener = mutableListOf<(String)->Unit>()
+    fun addDataListener(l:(String)->Unit){
+        DataListener.add(l)
+    }
+    fun removeDataListener(l:(String)->Unit){
+        DataListener.remove(l)
+    }
+
 
 
     fun stop(){
@@ -26,7 +33,7 @@ class SocketIO(val socket : Socket) {
     }
     fun startDataReceiving() {
         stop=false
-        thread=thread{
+        thread{
             try {
                 val br = BufferedReader(InputStreamReader(socket.getInputStream()))
                 while (!stop) {
@@ -34,15 +41,15 @@ class SocketIO(val socket : Socket) {
                     val data = br.readLine()
                     if(data!=null) {
                         //вывод данных
-                        println(data)//////более осмысленное действие с данными
+                        //println(data)//////более осмысленное действие с данными
+                        //вызов события с обработкой информации
+                        DataListener.forEach { it(data) }
                     }else{
                         //println("Связь прервалась ")
                         throw IOException("Связь прервалась")
                     }
                 }
             }catch (ex:Exception){
-                socket.close()
-                socketClosedListener.forEach { it() }
                 println(ex.message)//вызывалось изза строке br.readLine когда в stop socket.close() вызываем
             }
             finally{

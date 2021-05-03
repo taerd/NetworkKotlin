@@ -24,6 +24,11 @@ class Server(val port : Int=5804) {//значение по умолчанию 58
                 addSocketClosedListener { //есть доступ к clients тк как класс inner
                     clients.remove(this@Client)//указание с аннотацией тк как есть 2 this (от apply и this.client) и this@socket перекроет this@client
                 }
+                addDataListener{
+                    clients.forEach{ client ->
+                        if(client!=this@Client) client.sock?.sendData(this@Client.toString()+" :"+it)
+                    }
+                }
                 //отдельно будем запускать и запускать взаимодействие с SocketIO
                 startDataReceiving()//начать получение данных с противоположной стороны в thread
             }
@@ -38,8 +43,8 @@ class Server(val port : Int=5804) {//значение по умолчанию 58
     }
 
     fun stop(){
-        stop=true
         sSocket.close()
+        stop=true
     }
 
 
@@ -64,8 +69,9 @@ class Server(val port : Int=5804) {//значение по умолчанию 58
         //закрытие сокета клиентов
         acceptedClient.close()
     }
-    fun stopAllClient(){
-        clients.forEach { it.stop() }
+    private fun stopAllClient(){
+        //clients.forEach {client -> client.stop() }
+        clients.forEach{it.stop()}
     }
 
     fun start2(){

@@ -44,6 +44,9 @@ class Client(
     }
     fun start2(){
         communicator.startDataReceiving()
+        communicator.addDataListener {
+            println(it)//обработчик события в форму -окошко
+        }
     }
 
     fun send(data: String) {
