@@ -27,6 +27,9 @@ class Server(val port : Int=5804) {//значение по умолчанию 58
                 addDataListener{
                     clients.forEach{ client ->
                         if(client!=this@Client) client.sock?.sendData(this@Client.toString()+" :"+it)
+                        else{
+                            client.sock?.sendData("You said: "+it)
+                        }
                     }
                 }
                 //отдельно будем запускать и запускать взаимодействие с SocketIO
