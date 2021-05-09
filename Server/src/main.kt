@@ -1,9 +1,11 @@
 import java.util.*
 
 fun main(){
+    //Запуск сервера
     val s = Server()
-    s.start2()
+    s.start()
 
+    //Сервер остановится при вводе "STOP" в его консоль
     var cmd: String
     val sc= Scanner(System.`in`)
     do{

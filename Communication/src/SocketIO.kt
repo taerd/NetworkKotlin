@@ -5,10 +5,13 @@ import java.io.PrintWriter
 import java.net.Socket
 import kotlin.concurrent.thread
 
+/**
+ * Класс посредник - передатчик информации между подключенными
+ */
 class SocketIO(val socket : Socket) {
-    //для остановки клиента
     private var stop = false
-    //события когда теряется соединение с сокетом
+
+    //Событие, которое возникает при закрытии подключения
     private val socketClosedListener = mutableListOf<()->Unit>()
     fun addSocketClosedListener(l:()->Unit){
         socketClosedListener.add(l)
@@ -17,6 +20,7 @@ class SocketIO(val socket : Socket) {
         socketClosedListener.remove(l)
     }
 
+    //Событие которое возникает при получении информации от сокета
     private val DataListener = mutableListOf<(String)->Unit>()
     fun addDataListener(l:(String)->Unit){
         DataListener.add(l)
@@ -26,31 +30,33 @@ class SocketIO(val socket : Socket) {
     }
 
 
-
+    /**
+     * Принудительный разрыв соедения
+     * Закрытие сокетов
+     */
     fun stop(){
         stop=true
         socket.close()
     }
+
+    /**
+     * Функция обработки полученной информации
+     */
     fun startDataReceiving() {
         stop=false
         thread{
             try {
                 val br = BufferedReader(InputStreamReader(socket.getInputStream()))
                 while (!stop) {
-                    //считываем из потока строчки, который будет подвешивать процесс пока нет данных(нет символа конца строки)
                     val data = br.readLine()
                     if(data!=null) {
-                        //вывод данных
-                        //println(data)//////более осмысленное действие с данными
-                        //вызов события с обработкой информации
                         DataListener.forEach { it(data) }
                     }else{
-                        //println("Связь прервалась ")
                         throw IOException("Связь прервалась")
                     }
                 }
             }catch (ex:Exception){
-                println(ex.message)//вызывалось изза строке br.readLine когда в stop socket.close() вызываем
+                println(ex.message)
             }
             finally{
                 socket.close()
@@ -58,6 +64,11 @@ class SocketIO(val socket : Socket) {
             }
         }
     }
+
+    /**
+     * Отправка данных подключению
+     * @param data - сообщение/строка
+     */
     fun sendData(data:String):Boolean{
         try {
             val pw = PrintWriter(socket.getOutputStream())
@@ -68,5 +79,4 @@ class SocketIO(val socket : Socket) {
             return false
         }
     }
-
 }

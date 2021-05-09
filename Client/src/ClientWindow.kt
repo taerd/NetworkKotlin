@@ -4,14 +4,19 @@ import java.awt.Dimension
 import java.awt.TextField
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
-import java.awt.event.WindowEvent
 import java.net.Socket
 import javax.swing.*
 
+/**
+ * Клиент, который взаимодействует с пользователем через окно
+ * @param host -адрес сервера
+ * @param port - порт сервера
+ */
 class ClientWindow (
         val host : String,
         val port : Int
         ) :JFrame() {
+
     //window properties
     private val minSize = Dimension(550,400)
     private val textArea : JTextArea
@@ -89,15 +94,19 @@ class ClientWindow (
 
     }
 
+    /**
+     * Старт клиента, для взаимодействия с сервером(и другими клиентами)
+     */
     fun start(){
         communicator.startDataReceiving()
         communicator.addDataListener {
-            //println(it)//вывод на mainPanel
             textArea.append(it+"\n")
-            //println(it)
         }
     }
 
+    /**
+     * Функция отправки сообщения на сервер
+     */
     fun send(data: String) {
         communicator.sendData(data)
     }
