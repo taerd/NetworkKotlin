@@ -3,6 +3,10 @@ import java.io.InputStreamReader
 import kotlin.concurrent.thread
 
 fun main(){
+    val w = ClientWindow("localhost",5804)
+    w.isVisible=true
+    w.start()
+    /*
     //поскольку сервер работает на том же компе что и клиент указываем localhost
     val client = Client("localhost",5804)
     client.start2()
@@ -26,5 +30,5 @@ fun main(){
     }finally{
         client.stop()
     }
-
+    */
 }
