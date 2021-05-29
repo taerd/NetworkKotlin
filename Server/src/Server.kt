@@ -1,6 +1,8 @@
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.net.ServerSocket
 import java.net.Socket
-import kotlin.concurrent.thread
 
 /**
  * Класс для работы с клиентами, NETWORK WITH CLIENTS
@@ -66,25 +68,30 @@ class Server(val port : Int=5804) {
     }
 
     /**
+     * Ожидание новых подключений к серверу
+     * Приостанавливаемая функция и продолжение в месте остановки для корутин
+     * CoroutineScope - не блокирует основной процесс
+     */
+    fun ClientsWait() = CoroutineScope(Dispatchers.Default).launch {
+        try{
+            while(!stop){
+                clients.add(Client(sSocket.accept()).also{client->client.startDialog()})
+            }
+        }catch (e: Exception){
+            println("${e.message}")
+        }
+        finally {
+            stopAllClient()
+            sSocket.close()
+            println("Сервер остановлен")
+        }
+    }
+
+    /**
      * Старт сервера
-     * Сервер постоянно ждет новых подключений к нему
      */
     fun start(){
         stop=false
-        thread{
-            try{
-                while(!stop){
-                    clients.add(Client(sSocket.accept()).also{client->client.startDialog()})
-                }
-            }catch (e: Exception){
-                println("${e.message}")
-            }
-            finally {
-                stopAllClient()
-                sSocket.close()
-                println("Сервер остановлен")
-            }
-
-        }
+        ClientsWait()
     }
 }

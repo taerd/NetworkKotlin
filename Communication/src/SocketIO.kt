@@ -1,3 +1,7 @@
+import jdk.swing.interop.DispatcherWrapper
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
@@ -39,29 +43,28 @@ class SocketIO(val socket : Socket) {
         socket.close()
     }
 
+
     /**
      * Функция обработки полученной информации
      */
-    fun startDataReceiving() {
+    fun startDataReceiving()= CoroutineScope(Dispatchers.Default).launch{
         stop=false
-        thread{
-            try {
-                val br = BufferedReader(InputStreamReader(socket.getInputStream()))
-                while (!stop) {
-                    val data = br.readLine()
-                    if(data!=null) {
-                        DataListener.forEach { it(data) }
-                    }else{
-                        throw IOException("Связь прервалась")
-                    }
+        try {
+            val br = BufferedReader(InputStreamReader(socket.getInputStream()))
+            while (!stop) {
+                val data = br.readLine()
+                if(data!=null) {
+                    DataListener.forEach { it(data) }
+                }else{
+                    throw IOException("Связь прервалась")
                 }
-            }catch (ex:Exception){
-                println(ex.message)
             }
-            finally{
-                socket.close()
-                socketClosedListener.forEach { it() }
-            }
+        }catch (ex:Exception){
+            println(ex.message)
+        }
+        finally{
+            socket.close()
+            socketClosedListener.forEach { it() }
         }
     }
 

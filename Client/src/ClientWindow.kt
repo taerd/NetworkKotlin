@@ -22,6 +22,7 @@ class ClientWindow (
     private val textArea : JTextArea
     private val textField : TextField
     private val sendButton : Button
+    private val scroll : JScrollPane
 
     //client properties
     private val socket: Socket
@@ -34,7 +35,12 @@ class ClientWindow (
         textArea.background= Color.WHITE
         textArea.setBorder(BorderFactory.createLineBorder(Color.BLACK))
         textArea.isEditable=false
-        textArea.columns=10
+        //textArea.lineWrap=false
+        scroll = JScrollPane(textArea)
+        //scroll.verticalScrollBarPolicy
+        //textArea.lineWrap=true
+        //textArea.wrapStyleWord=false
+
         textField = TextField()
         sendButton = Button("send")
 
